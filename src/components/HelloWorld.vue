@@ -1,58 +1,164 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+  <div>
+    <div class="flex">
+      <h1>Participantes</h1>
+      <div class="box">
+        <input type="text" name="name" id="name" class="input" @keypress.enter="save()" v-model="name">
+        <button type="button" @click.prevent="save()" class="btn">Add</button>
+      </div>
+      <ul>
+        <li v-for="user in users" :key="user.id">
+          <button type="button" @click.prevent="deleteUser(user.id)">x</button>
+          {{ user.name }}
+        </li>  
+      </ul>
+      <button type="button" @click.prevent="shuffle()" class="btn-shuffle">Sortear Equipes</button>
+    </div>
+    <div class="teams" v-show="teams">
+      <h1>Times</h1>
+      <ul>
+        <li v-for="(team, index) in teams" :key="index">
+          <p v-for="user in team" :key="user.id">
+            {{ user.name }}
+          </p>
+        </li>
+      </ul>
+    </div>   
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'HelloWorld',
-  props: {
-    msg: String
+  data() {
+    return {
+      users: null,
+      name: null,
+      teams: null
+    }
+  },
+  mounted() {
+    this.getList();
+  },
+  methods: {
+    getList() {
+      axios
+        .get('http://45.32.170.183/list')
+        .then(r => this.users = r.data);
+    },
+    save() {
+      axios
+        .post('http://45.32.170.183/add', {
+          name: this.name
+        })
+        .then(r => {
+          if (r.status == 200) {
+            this.getList();
+            this.name = null;
+          }
+        });
+    },
+    shuffle() {
+      axios
+        .get('http://45.32.170.183/shuffle')
+        .then(r => this.teams = r.data);
+    },
+    deleteUser(id) {
+      axios
+        .delete(`http://45.32.170.183/remove/${id}`)
+        .then(r => {
+          if (r.status == 200) {
+            this.getList();
+          }
+        });
+    }
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+h1 {
+  margin: 40px 0 10px;
 }
 ul {
+  display: flex;
+  flex-wrap: wrap;
   list-style-type: none;
   padding: 0;
+  justify-content: center;
 }
 li {
-  display: inline-block;
-  margin: 0 10px;
+  position: relative;
+  min-width: 240px;
+  background-color: #42b983;
+  margin: 8px;
+  padding: 8px;
+  color: #fff;
+  font-weight: bold;
+  flex: 1
 }
-a {
-  color: #42b983;
+li button {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  top: -5px;
+  right: -5px;
+  background-color: #eee;
+  width: 20px;
+  border-radius: 2px;
+  font-weight: bold;
+  color: rgb(184, 0, 0);
+  cursor: pointer;
+  border: none;
+}
+.box {
+  width: 80%;
+  display: flex;
+  margin: auto;
+  margin-bottom: 16px;
+}
+
+.box .input {
+  flex: 1;
+  padding: 8px;
+  font-size: 24px;
+  margin-right: 8px;
+  border: 2px solid #44fa;
+  border-radius: 4px;
+}
+.box .btn {
+  padding: 10px 60px;
+  margin-left: 8px;
+  font-size: 20px;
+  background-color: #44fa;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .3s;
+}
+.box .btn:hover {
+  background-color: #44fe;
+}
+.btn-shuffle {
+  margin-top: 16px;
+  padding: 10px 60px;
+  font-size: 20px;
+  background-color: #44fa;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .3s;
+}
+.btn-shuffle:hover {
+  background-color: #44fe;
 }
 </style>
