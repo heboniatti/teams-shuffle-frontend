@@ -45,12 +45,12 @@ export default {
   methods: {
     getList() {
       axios
-        .get('http://45.32.170.183/list')
+        .get('https://stormy-harbor-74980.herokuapp.com/list')
         .then(r => this.users = r.data);
     },
     save() {
       axios
-        .post('http://45.32.170.183/add', {
+        .post('https://stormy-harbor-74980.herokuapp.com/add', {
           name: this.name
         })
         .then(r => {
@@ -62,12 +62,12 @@ export default {
     },
     shuffle() {
       axios
-        .get('http://45.32.170.183/shuffle')
+        .get('https://stormy-harbor-74980.herokuapp.com/shuffle')
         .then(r => this.teams = r.data);
     },
     deleteUser(id) {
       axios
-        .delete(`http://45.32.170.183/remove/${id}`)
+        .delete(`https://stormy-harbor-74980.herokuapp.com/remove/${id}`)
         .then(r => {
           if (r.status == 200) {
             this.getList();
